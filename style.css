@@ -633,7 +633,7 @@ html {
    Contact & Interactive Forms
 ========================================= */
 .contact-info-card {
-  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  background: linear-gradient(135deg, var(--primary), var(--dark));
   color: var(--white);
   padding: 40px;
   border-radius: var(--radius-md);
