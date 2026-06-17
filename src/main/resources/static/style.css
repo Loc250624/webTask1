@@ -872,3 +872,121 @@ html {
   overflow: hidden;
 }
 
+/* Shopping Cart Styles */
+#cartDrawer {
+  font-family: var(--font-body);
+}
+
+.cart-item-card {
+  display: flex;
+  gap: 16px;
+  padding: 16px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  transition: var(--transition-smooth);
+}
+
+.cart-item-card:last-child {
+  border-bottom: none;
+}
+
+.cart-item-img {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  flex-shrink: 0;
+}
+
+.cart-item-info {
+  flex-grow: 1;
+}
+
+.cart-item-name {
+  font-family: var(--font-headings);
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 4px;
+  color: var(--dark);
+}
+
+.cart-item-price {
+  font-family: var(--font-headings);
+  font-weight: 700;
+  color: var(--primary);
+  font-size: 0.95rem;
+}
+
+.quantity-controller {
+  display: inline-flex;
+  align-items: center;
+  border: 1.5px solid rgba(46, 125, 50, 0.2);
+  border-radius: var(--radius-round);
+  background: var(--white);
+  overflow: hidden;
+  padding: 2px 6px;
+  gap: 8px;
+}
+
+.quantity-btn {
+  background: transparent;
+  border: none;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: var(--primary);
+  transition: var(--transition-fast);
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+
+.quantity-btn:hover {
+  background: var(--primary-accent);
+}
+
+.quantity-val {
+  font-family: var(--font-headings);
+  font-weight: 700;
+  font-size: 0.9rem;
+  min-width: 16px;
+  text-align: center;
+  color: var(--dark);
+}
+
+.cart-remove-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  transition: var(--transition-fast);
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+}
+
+.cart-remove-btn:hover {
+  color: #d32f2f;
+  background: rgba(211, 47, 47, 0.05);
+}
+
+#navCartBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  transition: var(--transition-smooth);
+}
+
+#navCartBtn:hover {
+  background: var(--primary-accent);
+}
+
+

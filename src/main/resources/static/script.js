@@ -117,6 +117,247 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 4000);
   }
 
+  // =========================================
+  //    Shopping Cart Logic
+  // =========================================
+
+  // Helper: Retrieve cart from localStorage
+  function getCart() {
+    try {
+      const cartStr = localStorage.getItem('ecoverse_cart');
+      return cartStr ? JSON.parse(cartStr) : [];
+    } catch (e) {
+      console.error('Error reading cart state:', e);
+      return [];
+    }
+  }
+
+  // Helper: Save cart to localStorage and update indicators
+  function saveCart(cart) {
+    try {
+      localStorage.setItem('ecoverse_cart', JSON.stringify(cart));
+    } catch (e) {
+      console.error('Error saving cart state:', e);
+    }
+    updateCartBadge();
+    renderCartDrawerItems();
+  }
+
+  // Action: Add product to cart
+  function addToCart(product) {
+    const cart = getCart();
+    const existing = cart.find(item => item.id === product.id);
+    if (existing) {
+      existing.quantity += (product.quantity || 1);
+    } else {
+      cart.push({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        imageUrl: product.imageUrl || '',
+        quantity: product.quantity || 1
+      });
+    }
+    saveCart(cart);
+    showToast(`${product.name} added to cart!`);
+  }
+
+  // Action: Update cart item quantity
+  function updateCartQuantity(productId, quantity) {
+    let cart = getCart();
+    const existing = cart.find(item => item.id === productId);
+    if (existing) {
+      existing.quantity = quantity;
+      if (existing.quantity <= 0) {
+        cart = cart.filter(item => item.id !== productId);
+      }
+      saveCart(cart);
+    }
+  }
+
+  // Action: Remove product from cart
+  function removeFromCart(productId) {
+    let cart = getCart();
+    cart = cart.filter(item => item.id !== productId);
+    saveCart(cart);
+  }
+
+  // Action: Clear entire cart
+  function clearCart() {
+    saveCart([]);
+  }
+
+  // UI: Update cart badge count
+  function updateCartBadge() {
+    const cart = getCart();
+    const totalQty = cart.reduce((sum, item) => sum + item.quantity, 0);
+    const badges = document.querySelectorAll('#cartBadge');
+    badges.forEach(badge => {
+      if (totalQty > 0) {
+        badge.textContent = totalQty;
+        badge.style.display = 'inline-block';
+      } else {
+        badge.style.display = 'none';
+      }
+    });
+  }
+
+  // UI: Inject the Bootstrap Offcanvas Cart drawer HTML
+  function injectCartDrawer() {
+    if (document.getElementById('cartDrawer')) return;
+
+    const drawerDiv = document.createElement('div');
+    drawerDiv.innerHTML = `
+      <div class="offcanvas offcanvas-end" tabindex="-1" id="cartDrawer" aria-labelledby="cartDrawerLabel" style="width: 420px; max-width: 100vw; background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(15px); border-left: 1px solid var(--glass-border); box-shadow: var(--glass-shadow-large); z-index: 1060;">
+        <div class="offcanvas-header border-0 pb-0" style="padding: 24px 24px 10px;">
+          <h5 class="offcanvas-title fw-bold font-headings" id="cartDrawerLabel" style="font-size: 1.5rem; color: var(--dark);">
+            <i class="bi bi-bag-heart-fill me-2" style="color: var(--primary);"></i>Your Cart
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close" style="background-color: var(--primary-accent); border-radius: 50%; padding: 8px; opacity: 1;"></button>
+        </div>
+        <div class="offcanvas-body d-flex flex-column" style="padding: 24px;">
+          <!-- Dynamic Cart Content -->
+          <div id="cartItemsList" class="flex-grow-1 overflow-y-auto pe-1" style="max-height: calc(100vh - 280px);">
+            <!-- Cart items will be loaded here dynamically -->
+          </div>
+          
+          <!-- Cart Summary and Actions -->
+          <div id="cartSummarySection" class="pt-4 border-top mt-auto" style="border-color: rgba(0,0,0,0.08) !important;">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <span class="text-muted fw-semibold font-body">Subtotal</span>
+              <span class="fw-bold font-headings fs-4 text-primary" id="cartSubtotal">$0.00</span>
+            </div>
+            <a href="checkout.html" class="btn btn-premium btn-premium-primary w-100 justify-content-center py-3" id="checkoutBtn" style="border-radius: var(--radius-md);">
+              Proceed to Checkout <i class="bi bi-arrow-right ms-2"></i>
+            </a>
+            <div class="text-center mt-3">
+              <a href="#" class="text-danger small fw-bold text-decoration-none" id="clearCartBtn"><i class="bi bi-trash3 me-1"></i>Clear All Items</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(drawerDiv.firstElementChild);
+
+    // Attach clear cart action
+    const clearBtn = document.getElementById('clearCartBtn');
+    if (clearBtn) {
+      clearBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        clearCart();
+      });
+    }
+  }
+
+  // UI: Render dynamic items inside the Cart drawer
+  function renderCartDrawerItems() {
+    const itemsList = document.getElementById('cartItemsList');
+    const subtotalEl = document.getElementById('cartSubtotal');
+    const summarySec = document.getElementById('cartSummarySection');
+    if (!itemsList) return;
+
+    const cart = getCart();
+    if (cart.length === 0) {
+      itemsList.innerHTML = `
+        <div class="text-center py-5">
+          <i class="bi bi-bag-x text-muted" style="font-size: 3rem;"></i>
+          <p class="text-muted mt-3 font-headings fs-5">Your cart is empty.</p>
+          <p class="text-muted small">Start shopping for sustainable treasures!</p>
+          <button class="btn btn-premium btn-premium-secondary mt-3 py-2 px-4" data-bs-dismiss="offcanvas">Shop Now</button>
+        </div>
+      `;
+      if (subtotalEl) subtotalEl.textContent = '$0.00';
+      if (summarySec) summarySec.style.display = 'none';
+      return;
+    }
+
+    if (summarySec) summarySec.style.display = 'block';
+
+    let listHTML = '';
+    let subtotal = 0;
+
+    cart.forEach(item => {
+      const itemTotal = item.price * item.quantity;
+      subtotal += itemTotal;
+
+      listHTML += `
+        <div class="cart-item-card">
+          <img src="${item.imageUrl || 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=200&q=80'}" alt="${item.name}" class="cart-item-img">
+          <div class="cart-item-info">
+            <h4 class="cart-item-name">${item.name}</h4>
+            <div class="d-flex justify-content-between align-items-center mt-2">
+              <div class="quantity-controller">
+                <button class="quantity-btn qty-down-btn" data-id="${item.id}">-</button>
+                <span class="quantity-val">${item.quantity}</span>
+                <button class="quantity-btn qty-up-btn" data-id="${item.id}">+</button>
+              </div>
+              <span class="cart-item-price">$${item.price.toFixed(2)}</span>
+            </div>
+          </div>
+          <button class="cart-remove-btn delete-cart-item-btn" data-id="${item.id}" aria-label="Remove item">
+            <i class="bi bi-trash3"></i>
+          </button>
+        </div>
+      `;
+    });
+
+    itemsList.innerHTML = listHTML;
+    if (subtotalEl) subtotalEl.textContent = `$${subtotal.toFixed(2)}`;
+
+    // Add button listeners
+    document.querySelectorAll('.qty-down-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = parseInt(e.target.getAttribute('data-id'));
+        const item = cart.find(i => i.id === id);
+        if (item) {
+          updateCartQuantity(id, item.quantity - 1);
+        }
+      });
+    });
+
+    document.querySelectorAll('.qty-up-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = parseInt(e.target.getAttribute('data-id'));
+        const item = cart.find(i => i.id === id);
+        if (item) {
+          updateCartQuantity(id, item.quantity + 1);
+        }
+      });
+    });
+
+    document.querySelectorAll('.delete-cart-item-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const target = e.target.closest('.delete-cart-item-btn');
+        const id = parseInt(target.getAttribute('data-id'));
+        removeFromCart(id);
+      });
+    });
+  }
+
+  // Attach click listeners to statically rendered add-to-cart buttons (like on index.html)
+  function bindStaticCartButtons() {
+    document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+      const newBtn = btn.cloneNode(true);
+      btn.parentNode.replaceChild(newBtn, btn);
+      
+      newBtn.addEventListener('click', (e) => {
+        const target = e.currentTarget;
+        const id = parseInt(target.getAttribute('data-id')) || 1;
+        const name = target.getAttribute('data-name') || 'Sustainable Product';
+        const price = parseFloat(target.getAttribute('data-price')) || 0;
+        const imageUrl = target.getAttribute('data-image') || '';
+
+        addToCart({
+          id: id,
+          name: name,
+          price: price,
+          imageUrl: imageUrl,
+          quantity: 1
+        });
+      });
+    });
+  }
+
   // 5. Inject Authentication Modal HTML
   function injectAuthModal() {
     if (document.getElementById('authModal')) return;
@@ -210,9 +451,39 @@ document.addEventListener('DOMContentLoaded', () => {
     if (existingAuthNode) {
       existingAuthNode.remove();
     }
+    const existingCartNode = document.getElementById('navbarCartNode');
+    if (existingCartNode) {
+      existingCartNode.remove();
+    }
 
     const authLi = document.createElement('li');
     authLi.id = 'navbarAuthNode';
+
+    const isAdmin = currentUser && currentUser.role === 'admin';
+
+    // Insert Cart first if not admin
+    if (!isAdmin) {
+      const cartLi = document.createElement('li');
+      cartLi.id = 'navbarCartNode';
+      cartLi.className = 'nav-item ms-lg-2 me-lg-1';
+      cartLi.innerHTML = `
+        <a class="nav-link position-relative" href="#" id="navCartBtn" style="cursor: pointer; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%;" aria-label="Open shopping cart">
+          <i class="bi bi-cart3 fs-5"></i>
+          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="cartBadge" style="display: none; font-size: 0.7rem; padding: 4px 6px;">0</span>
+        </a>
+      `;
+      navbarNav.insertBefore(cartLi, navbarNav.lastElementChild);
+
+      // Attach drawer trigger
+      document.getElementById('navCartBtn').addEventListener('click', (e) => {
+        e.preventDefault();
+        const cartDrawerEl = document.getElementById('cartDrawer');
+        if (cartDrawerEl) {
+          const bsOffcanvas = bootstrap.Offcanvas.getOrCreateInstance(cartDrawerEl);
+          bsOffcanvas.show();
+        }
+      });
+    }
 
     if (currentUser && currentToken) {
       // User is logged in
@@ -245,6 +516,9 @@ document.addEventListener('DOMContentLoaded', () => {
         authModal.show();
       });
     }
+
+    // Update cart badge initially
+    updateCartBadge();
   }
 
   // Authentication Handlers
@@ -447,7 +721,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
             <div class="d-flex justify-content-between align-items-center mt-auto pt-3">
               <span class="glass-card-price">$${product.price.toFixed(2)}</span>
-              <button class="btn btn-premium btn-premium-primary py-2 px-3 fs-6 add-to-cart-btn" style="border-radius: 50%;" aria-label="Add to cart"><i class="bi bi-bag"></i></button>
+              <button class="btn btn-premium btn-premium-primary py-2 px-3 fs-6 add-to-cart-btn" style="border-radius: 50%;" aria-label="Add to cart" data-id="${product.id}" data-name="${product.name}" data-price="${product.price}" data-image="${product.imageUrl || ''}"><i class="bi bi-bag"></i></button>
             </div>
           </div>
         </div>
@@ -460,8 +734,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Attach listeners to cart buttons
     document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        showToast('Item added to cart!');
+      btn.addEventListener('click', (e) => {
+        const target = e.currentTarget;
+        const id = parseInt(target.getAttribute('data-id')) || 1;
+        const name = target.getAttribute('data-name') || 'Sustainable Product';
+        const price = parseFloat(target.getAttribute('data-price')) || 0;
+        const imageUrl = target.getAttribute('data-image') || '';
+
+        addToCart({
+          id: id,
+          name: name,
+          price: price,
+          imageUrl: imageUrl,
+          quantity: 1
+        });
       });
     });
   }
@@ -628,5 +914,199 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Run Auth Init
   injectAuthModal();
+  injectCartDrawer();
   updateNavbar();
+  bindStaticCartButtons();
+
+  // Buy Now handler (on product-detail.html)
+  const buyNowBtn = document.getElementById('buyNowBtn');
+  if (buyNowBtn) {
+    buyNowBtn.addEventListener('click', () => {
+      const qtyInput = document.getElementById('detailQty');
+      const qty = qtyInput ? parseInt(qtyInput.value) || 1 : 1;
+      
+      const cart = getCart();
+      const existingItem = cart.find(i => i.id === 1);
+      if (existingItem) {
+        existingItem.quantity += qty;
+      } else {
+        cart.push({
+          id: 1,
+          name: 'Insulated Eco-Flask',
+          price: 28.00,
+          imageUrl: 'https://images.unsplash.com/photo-1602143407151-7111542de6e8?auto=format&fit=crop&w=800&q=80',
+          quantity: qty
+        });
+      }
+      saveCart(cart);
+      window.location.href = 'checkout.html';
+    });
+  }
+
+  // Checkout page handlers
+  const checkoutSection = document.getElementById('checkoutSection');
+  if (checkoutSection) {
+    renderCheckoutSummary();
+  }
+
+  function renderCheckoutSummary() {
+    const orderItemsContainer = document.querySelector('#checkoutSection .col-lg-5 .glass-card');
+    if (!orderItemsContainer) return;
+    
+    const cart = getCart();
+    if (cart.length === 0) {
+      orderItemsContainer.innerHTML = `
+        <h3 class="font-headings mb-4">Order Summary</h3>
+        <p class="text-muted">Your cart is empty.</p>
+        <a href="services.html" class="btn btn-premium btn-premium-primary w-100 justify-content-center">Go to Shop</a>
+      `;
+      const placeOrderBtn = document.getElementById('placeOrderBtn');
+      if (placeOrderBtn) placeOrderBtn.disabled = true;
+      return;
+    }
+    
+    let itemsHTML = '';
+    let subtotal = 0;
+    
+    cart.forEach(item => {
+      const itemTotal = item.price * item.quantity;
+      subtotal += itemTotal;
+      itemsHTML += `
+        <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom" data-id="${item.id}">
+          <div style="width: 80px; height: 80px; border-radius: 12px; overflow: hidden; flex-shrink: 0;">
+            <img src="${item.imageUrl || 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=200&q=80'}" alt="${item.name}" style="width: 100%; height: 100%; object-fit: cover;" />
+          </div>
+          <div class="flex-grow-1">
+            <h6 class="fw-bold mb-1 font-headings">${item.name}</h6>
+            <div class="d-flex align-items-center mt-2 border rounded-pill px-2" style="max-width: 110px; height: 32px;">
+              <button type="button" class="btn btn-link text-dark p-0 text-decoration-none checkout-qty-down-btn" data-id="${item.id}">
+                <i class="bi bi-dash"></i>
+              </button>
+              <input type="number" class="form-control form-control-sm text-center border-0 fw-bold px-1 checkout-qty-input" value="${item.quantity}" min="1" data-id="${item.id}" readonly style="background: transparent; box-shadow: none;" />
+              <button type="button" class="btn btn-link text-dark p-0 text-decoration-none checkout-qty-up-btn" data-id="${item.id}">
+                <i class="bi bi-plus"></i>
+              </button>
+            </div>
+          </div>
+          <div class="fw-bold text-dark fs-5">$${itemTotal.toFixed(2)}</div>
+        </div>
+      `;
+    });
+    
+    orderItemsContainer.innerHTML = `
+      <h3 class="font-headings mb-4">Order Summary</h3>
+      <div id="checkoutItemsList">
+        ${itemsHTML}
+      </div>
+      <div class="d-flex justify-content-between mb-2 mt-4">
+        <span class="text-muted">Subtotal</span>
+        <span class="fw-medium text-dark">$${subtotal.toFixed(2)}</span>
+      </div>
+      <div class="d-flex justify-content-between mb-3 pb-3 border-bottom">
+        <span class="text-muted">Eco-Shipping (Carbon Neutral)</span>
+        <span class="fw-medium text-success">Free</span>
+      </div>
+      <div class="d-flex justify-content-between align-items-center">
+        <span class="fs-5 fw-bold font-headings text-dark">Total</span>
+        <span class="fs-3 fw-bold font-headings text-primary">$${subtotal.toFixed(2)}</span>
+      </div>
+    `;
+    
+    document.querySelectorAll('.checkout-qty-down-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = parseInt(e.currentTarget.getAttribute('data-id'));
+        const item = cart.find(i => i.id === id);
+        if (item) {
+          updateCartQuantity(id, item.quantity - 1);
+          renderCheckoutSummary();
+        }
+      });
+    });
+    
+    document.querySelectorAll('.checkout-qty-up-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = parseInt(e.currentTarget.getAttribute('data-id'));
+        const item = cart.find(i => i.id === id);
+        if (item) {
+          updateCartQuantity(id, item.quantity + 1);
+          renderCheckoutSummary();
+        }
+      });
+    });
+  }
+
+  const checkoutForm = document.getElementById('checkoutForm');
+  if (checkoutForm) {
+    const chName = document.getElementById('checkoutName');
+    const chPhone = document.getElementById('checkoutPhone');
+    const chEmail = document.getElementById('checkoutEmail');
+    const chAddress = document.getElementById('checkoutAddress');
+
+    chName.addEventListener('input', () => validateField(chName, chName.value.trim().length >= 3, 'Please enter your full name.'));
+    chPhone.addEventListener('input', () => validateField(chPhone, chPhone.value.trim().length >= 9, 'Please enter a valid phone number.'));
+    chEmail.addEventListener('input', () => validateField(chEmail, validateEmail(chEmail.value.trim()), 'Please enter a valid email.'));
+    chAddress.addEventListener('input', () => validateField(chAddress, chAddress.value.trim().length >= 10, 'Please enter your delivery address.'));
+
+    checkoutForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const isNameValid = validateField(chName, chName.value.trim().length >= 3, 'Please enter your full name.');
+      const isPhoneValid = validateField(chPhone, chPhone.value.trim().length >= 9, 'Please enter a valid phone number.');
+      const isEmailValid = validateField(chEmail, validateEmail(chEmail.value.trim()), 'Please enter a valid email.');
+      const isAddressValid = validateField(chAddress, chAddress.value.trim().length >= 10, 'Please enter your delivery address.');
+
+      if (isNameValid && isPhoneValid && isEmailValid && isAddressValid) {
+        clearCart();
+        showCheckoutSuccessModal(chName.value.trim());
+      }
+    });
+  }
+
+  function showCheckoutSuccessModal(userName) {
+    let modal = document.getElementById('checkoutSuccessModal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'checkoutSuccessModal';
+      modal.style.position = 'fixed';
+      modal.style.top = '0';
+      modal.style.left = '0';
+      modal.style.width = '100%';
+      modal.style.height = '100%';
+      modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
+      modal.style.backdropFilter = 'blur(8px)';
+      modal.style.webkitBackdropFilter = 'blur(8px)';
+      modal.style.display = 'flex';
+      modal.style.alignItems = 'center';
+      modal.style.justifyContent = 'center';
+      modal.style.zIndex = '9999';
+      modal.style.opacity = '0';
+      modal.style.transition = 'opacity 0.4s ease';
+
+      modal.innerHTML = `
+        <div class="glass-card" style="max-width: 450px; width: 90%; padding: 40px; text-align: center; border-radius: 24px; background: rgba(255,255,255,0.95); box-shadow: 0 20px 50px rgba(0,0,0,0.15);">
+          <div class="benefit-icon-box" style="margin: 0 auto 24px; background: var(--primary-accent); color: var(--primary); width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem;">
+            <i class="bi bi-bag-check-fill"></i>
+          </div>
+          <h3 style="font-family: var(--font-headings); font-weight: 700; color: var(--dark); margin-bottom: 12px;">Order Placed!</h3>
+          <p style="color: var(--text-muted); line-height: 1.6; margin-bottom: 30px;">Thank you, <span id="checkoutModalUserName" style="color: var(--primary); font-weight: bold;"></span>. Your order has been placed successfully. An email confirmation has been sent to you.</p>
+          <button id="closeCheckoutModalBtn" class="btn-premium btn-premium-primary" style="padding: 12px 36px; margin: 0 auto; width: 100%; justify-content: center;">Continue Shopping</button>
+        </div>
+      `;
+      document.body.appendChild(modal);
+
+      document.getElementById('closeCheckoutModalBtn').addEventListener('click', () => {
+        modal.style.opacity = '0';
+        setTimeout(() => {
+          modal.style.display = 'none';
+          window.location.href = 'services.html';
+        }, 400);
+      });
+    }
+
+    document.getElementById('checkoutModalUserName').textContent = userName;
+    modal.style.display = 'flex';
+    setTimeout(() => {
+      modal.style.opacity = '1';
+    }, 50);
+  }
 });
