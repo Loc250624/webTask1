@@ -207,6 +207,13 @@
       }
       const user = JSON.parse(userStr);
 
+      // Restrict access to admin role only
+      if (!user.role || user.role !== 'admin') {
+        alert('Access denied: Admin role required.');
+        window.location.href = 'index.html';
+        return;
+      }
+
       // Populate user dropdown in navbar
       const adminUserDropdownNode = document.getElementById('adminUserDropdownNode');
       adminUserDropdownNode.innerHTML = `

@@ -4,28 +4,18 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "users")
+@Table(name = "user_role")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User {
+public class UserRole {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false, unique = true)
-    private String username;
-
-    @Column(nullable = false, unique = true)
-    private String email;
-
-    @Column(nullable = false)
-    private String password;
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "role_id")
-    private UserRole role;
+    private String name;
 }

@@ -4,9 +4,11 @@ import com.example.group_task_spring_boot.dto.LoginRequest;
 import com.example.group_task_spring_boot.dto.SignUpRequest;
 import com.example.group_task_spring_boot.dto.UserResponse;
 import com.example.group_task_spring_boot.entity.User;
+import com.example.group_task_spring_boot.entity.UserRole;
 import com.example.group_task_spring_boot.exception.BadRequestException;
 import com.example.group_task_spring_boot.exception.UnauthorizedException;
 import com.example.group_task_spring_boot.repository.UserRepository;
+import com.example.group_task_spring_boot.repository.UserRoleRepository;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,9 @@ public class AuthService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private UserRoleRepository userRoleRepository;
 
     // In-memory thread-safe session storage mapping tokens to users
     private final Map<String, User> sessions = new ConcurrentHashMap<>();
@@ -52,10 +57,15 @@ public class AuthService {
 
         // Save new user
         String hashedPassword = BCrypt.hashpw(request.getPassword(), BCrypt.gensalt());
+        
+        UserRole customerRole = userRoleRepository.findByName("khách hàng")
+                .orElseGet(() -> userRoleRepository.save(UserRole.builder().name("khách hàng").build()));
+
         User user = User.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .password(hashedPassword)
+                .role(customerRole)
                 .build();
 
         User savedUser = userRepository.save(user);
@@ -66,6 +76,7 @@ public class AuthService {
                 .username(savedUser.getUsername())
                 .email(savedUser.getEmail())
                 .token(token)
+                .role(savedUser.getRole() != null ? savedUser.getRole().getName() : null)
                 .build();
     }
 
@@ -86,6 +97,7 @@ public class AuthService {
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .token(token)
+                .role(user.getRole() != null ? user.getRole().getName() : null)
                 .build();
     }
 

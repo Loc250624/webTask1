@@ -1,6 +1,8 @@
 package com.example.group_task_spring_boot.controller;
 
 import com.example.group_task_spring_boot.entity.Product;
+import com.example.group_task_spring_boot.entity.User;
+import com.example.group_task_spring_boot.exception.UnauthorizedException;
 import com.example.group_task_spring_boot.service.AuthService;
 import com.example.group_task_spring_boot.service.ProductService;
 import jakarta.validation.Valid;
@@ -38,7 +40,10 @@ public class ProductController {
             @RequestHeader(value = "Authorization", required = false) String token,
             @Valid @RequestBody Product product) {
         // Require authentication for creation
-        authService.validateTokenAndGetUser(token);
+        User user = authService.validateTokenAndGetUser(token);
+        if (user.getRole() == null || !"admin".equalsIgnoreCase(user.getRole().getName())) {
+            throw new UnauthorizedException("Access denied: Admin role required.");
+        }
         Product createdProduct = productService.createProduct(product);
         return new ResponseEntity<>(createdProduct, HttpStatus.CREATED);
     }
@@ -49,7 +54,10 @@ public class ProductController {
             @PathVariable Long id,
             @Valid @RequestBody Product productDetails) {
         // Require authentication for update
-        authService.validateTokenAndGetUser(token);
+        User user = authService.validateTokenAndGetUser(token);
+        if (user.getRole() == null || !"admin".equalsIgnoreCase(user.getRole().getName())) {
+            throw new UnauthorizedException("Access denied: Admin role required.");
+        }
         Product updatedProduct = productService.updateProduct(id, productDetails);
         return new ResponseEntity<>(updatedProduct, HttpStatus.OK);
     }
@@ -59,7 +67,10 @@ public class ProductController {
             @RequestHeader(value = "Authorization", required = false) String token,
             @PathVariable Long id) {
         // Require authentication for delete
-        authService.validateTokenAndGetUser(token);
+        User user = authService.validateTokenAndGetUser(token);
+        if (user.getRole() == null || !"admin".equalsIgnoreCase(user.getRole().getName())) {
+            throw new UnauthorizedException("Access denied: Admin role required.");
+        }
         productService.deleteProduct(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

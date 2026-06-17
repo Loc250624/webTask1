@@ -1,7 +1,12 @@
 package com.example.group_task_spring_boot.config;
 
 import com.example.group_task_spring_boot.entity.Product;
+import com.example.group_task_spring_boot.entity.User;
+import com.example.group_task_spring_boot.entity.UserRole;
 import com.example.group_task_spring_boot.repository.ProductRepository;
+import com.example.group_task_spring_boot.repository.UserRepository;
+import com.example.group_task_spring_boot.repository.UserRoleRepository;
+import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -14,8 +19,45 @@ public class DataInitializer implements CommandLineRunner {
     @Autowired
     private ProductRepository productRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private UserRoleRepository userRoleRepository;
+
     @Override
     public void run(String... args) throws Exception {
+        // 1. Seed Roles
+        UserRole adminRole = userRoleRepository.findByName("admin")
+                .orElseGet(() -> userRoleRepository.save(UserRole.builder().name("admin").build()));
+        UserRole customerRole = userRoleRepository.findByName("khách hàng")
+                .orElseGet(() -> userRoleRepository.save(UserRole.builder().name("khách hàng").build()));
+
+        // 2. Seed Default Admin
+        if (!userRepository.existsByUsername("admin")) {
+            User adminUser = User.builder()
+                    .username("admin")
+                    .email("admin@example.com")
+                    .password(BCrypt.hashpw("admin123", BCrypt.gensalt()))
+                    .role(adminRole)
+                    .build();
+            userRepository.save(adminUser);
+            System.out.println("--- Seeded default admin user ---");
+        }
+
+        // 3. Seed Default Customer
+        if (!userRepository.existsByUsername("customer")) {
+            User customerUser = User.builder()
+                    .username("customer")
+                    .email("customer@example.com")
+                    .password(BCrypt.hashpw("customer123", BCrypt.gensalt()))
+                    .role(customerRole)
+                    .build();
+            userRepository.save(customerUser);
+            System.out.println("--- Seeded default customer user ---");
+        }
+
+        // 4. Seed Products
         if (productRepository.count() == 0) {
             Product flask = Product.builder()
                     .name("Insulated Eco-Flask")

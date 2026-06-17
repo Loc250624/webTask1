@@ -222,8 +222,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <i class="bi bi-person-circle me-1"></i> <span>Hi, ${currentUser.username}</span>
         </a>
         <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="navbarUserDropdown" style="border-radius: var(--radius-md); border: 1px solid var(--glass-border); background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);">
-          <li><a class="dropdown-item py-2" href="admin.html"><i class="bi bi-gear me-2"></i>Manage Products</a></li>
-          <li><hr class="dropdown-divider"></li>
+          ${currentUser.role === 'admin' ? '<li><a class="dropdown-item py-2" href="admin.html"><i class="bi bi-gear me-2"></i>Manage Products</a></li><li><hr class="dropdown-divider"></li>' : ''}
           <li><a class="dropdown-item py-2 text-danger" href="#" id="navLogoutBtn"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
         </ul>
       `;
@@ -279,7 +278,8 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.setItem('user', JSON.stringify({
         id: data.id,
         username: data.username,
-        email: data.email
+        email: data.email,
+        role: data.role || null
       }));
       currentUser = data;
       currentToken = data.token;
@@ -336,7 +336,8 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.setItem('user', JSON.stringify({
         id: data.id,
         username: data.username,
-        email: data.email
+        email: data.email,
+        role: data.role || null
       }));
       currentUser = data;
       currentToken = data.token;
