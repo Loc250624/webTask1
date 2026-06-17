@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Products - EcoVerse Admin Panel</title>
+  <meta name="description" content="Manage EcoVerse sustainable catalog products. Add, update, and delete items in the database.">
+  
+  <!-- Bootstrap 5 CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- Bootstrap Icons CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  
+  <!-- Custom CSS -->
+  <link href="style.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+  <!-- Navigation Header -->
+  <nav class="navbar navbar-expand-lg navbar-custom fixed-top" id="mainNavbar">
+    <div class="container">
+      <a class="navbar-brand" href="index.html" id="navBrandLogo">
+        <i class="bi bi-leaf logo-icon"></i>
+        <span>EcoVerse Control Panel</span>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#ecoNavbar" aria-controls="ecoNavbar" aria-expanded="false" aria-label="Toggle navigation" id="navbarTogglerBtn">
+        <span class="bi bi-list fs-3" style="color: var(--primary);"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="ecoNavbar">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
+          <li class="nav-item">
+            <a class="nav-link" href="index.html" id="navHome">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="services.html" id="navServices">Shop / Products</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="contact.html" id="navContact">Contact</a>
+          </li>
+          <li class="nav-item ms-lg-3 dropdown" id="adminUserDropdownNode">
+            <!-- Populated dynamically -->
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Page Header -->
+  <header class="py-5" style="background: linear-gradient(135deg, rgba(46,125,50,0.08), rgba(211,158,69,0.06)); padding-top: 130px !important;">
+    <div class="container py-4 text-center">
+      <h1 class="display-5 fw-extrabold font-headings" id="adminHeaderTitle">Catalog Dashboard</h1>
+      <p class="text-muted mb-0">Create, Read, Update, and Delete products in real-time.</p>
+    </div>
+  </header>
+
+  <!-- Dashboard Main Section -->
+  <main class="py-5">
+    <div class="container">
+      
+      <!-- Stats & Quick Actions -->
+      <div class="row g-4 mb-5 justify-content-between align-items-center">
+        <div class="col-md-8">
+          <div class="d-flex gap-4">
+            <div class="glass-card px-4 py-3 text-center d-flex flex-column align-items-center justify-content-center" style="min-width: 150px;">
+              <span class="text-muted small text-uppercase fw-bold">Total Items</span>
+              <span class="fs-2 fw-bold text-primary" id="statTotalItems">0</span>
+            </div>
+            <div class="glass-card px-4 py-3 text-center d-flex flex-column align-items-center justify-content-center" style="min-width: 150px;">
+              <span class="text-muted small text-uppercase fw-bold">Categories</span>
+              <span class="fs-2 fw-bold text-secondary" id="statTotalCategories">3</span>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4 text-md-end">
+          <button class="btn btn-premium btn-premium-primary" id="openAddProductModalBtn">
+            <i class="bi bi-plus-lg me-1"></i> Add New Product
+          </button>
+        </div>
+      </div>
+
+      <!-- Products Management Table -->
+      <div class="glass-card p-4 overflow-hidden">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0" id="adminProductsTable">
+            <thead class="table-light">
+              <tr class="font-headings">
+                <th scope="col" style="width: 100px;">Image</th>
+                <th scope="col">Product Name</th>
+                <th scope="col" style="width: 150px;">Category</th>
+                <th scope="col" style="width: 120px;">Price</th>
+                <th scope="col">Description</th>
+                <th scope="col" class="text-center" style="width: 150px;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="adminProductsTableBody">
+              <!-- Dynamically rendered -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Add/Edit Product Modal -->
+  <div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true" style="backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content glass-card" style="border-radius: var(--radius-lg); background: rgba(255, 255, 255, 0.95); border: 1px solid var(--glass-border); box-shadow: var(--glass-shadow-large);">
+        <div class="modal-header border-0 pb-0 justify-content-between px-4 pt-4">
+          <h3 class="modal-title font-headings fw-bold" id="productModalLabel">Add New Product</h3>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="background-color: var(--primary-accent); border-radius: 50%; padding: 8px;"></button>
+        </div>
+        <form id="productForm" novalidate>
+          <div class="modal-body px-4 pb-4 pt-3">
+            <input type="hidden" id="productId">
+            
+            <div class="form-group-custom">
+              <label for="prodName" class="form-label-custom">Product Name</label>
+              <input type="text" id="prodName" class="form-control-custom" placeholder="e.g. Organic Cotton Tote" required>
+              <div class="validation-message">Product name is required.</div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group-custom">
+                  <label for="prodPrice" class="form-label-custom">Price ($)</label>
+                  <input type="number" id="prodPrice" step="0.01" class="form-control-custom" placeholder="e.g. 19.99" required>
+                  <div class="validation-message">Valid price is required.</div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group-custom">
+                  <label for="prodCategory" class="form-label-custom">Category</label>
+                  <select id="prodCategory" class="form-select form-control-custom" required>
+                    <option value="" disabled selected>Select Category</option>
+                    <option value="home">Home & Living</option>
+                    <option value="personal">Personal Care</option>
+                    <option value="lifestyle">Lifestyle Essentials</option>
+                  </select>
+                  <div class="validation-message">Category is required.</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group-custom">
+              <label for="prodImageUrl" class="form-label-custom">Image URL</label>
+              <input type="url" id="prodImageUrl" class="form-control-custom" placeholder="https://images.unsplash.com/photo..." required>
+              <div class="validation-message">Image URL is required.</div>
+            </div>
+
+            <div class="form-group-custom">
+              <label for="prodDesc" class="form-label-custom">Description</label>
+              <textarea id="prodDesc" class="form-control-custom" rows="3" placeholder="Describe this circular product..." required></textarea>
+              <div class="validation-message">Description is required.</div>
+            </div>
+
+            <div class="validation-message text-center mb-3 fs-6" id="productFormGeneralFeedback" style="color:#d32f2f;"></div>
+          </div>
+          <div class="modal-footer border-0 px-4 pb-4 pt-0">
+            <button type="button" class="btn btn-premium btn-premium-secondary py-2" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-premium btn-premium-primary py-2" id="saveProductBtn">Save Product</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmLabel" aria-hidden="true" style="backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
+      <div class="modal-content glass-card" style="border-radius: var(--radius-lg); background: rgba(255, 255, 255, 0.95); border: 1px solid var(--glass-border); box-shadow: var(--glass-shadow-large); padding: 20px;">
+        <div class="text-center">
+          <div class="benefit-icon-box mx-auto" style="background: rgba(211,47,47,0.1); color: #d32f2f; width: 60px; height: 60px; border-radius: 50%; font-size: 2rem;">
+            <i class="bi bi-trash-fill"></i>
+          </div>
+          <h3 class="font-headings mt-3" style="font-weight: 700;">Delete Product?</h3>
+          <p class="text-muted mt-2">Are you sure you want to remove <strong id="deleteProductName">this product</strong>? This action is permanent and cannot be undone.</p>
+          <div class="d-flex gap-3 justify-content-center mt-4">
+            <button class="btn btn-premium btn-premium-secondary py-2 px-4" data-bs-dismiss="modal">No, Keep</button>
+            <button class="btn btn-premium btn-premium-primary py-2 px-4" style="background: #d32f2f; color: white; box-shadow: 0 4px 12px rgba(211, 47, 47, 0.2);" id="confirmDeleteBtn">Yes, Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer Section -->
+  <footer class="footer py-4 mt-5">
+    <div class="container text-center">
+      <p class="mb-0">&copy; 2026 EcoVerse Group. All rights reserved. Empowering Green Living.</p>
+    </div>
+  </footer>
+
+  <!-- Bootstrap JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- Custom JS for Admin Operations -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Access security verification
+      const token = localStorage.getItem('token');
+      const userStr = localStorage.getItem('user');
+      if (!token || !userStr) {
+        window.location.href = 'index.html';
+        return;
+      }
+      const user = JSON.parse(userStr);
+
+      // Populate user dropdown in navbar
+      const adminUserDropdownNode = document.getElementById('adminUserDropdownNode');
+      adminUserDropdownNode.innerHTML = `
+        <a class="nav-link dropdown-toggle" href="#" id="adminNavbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="bi bi-person-circle me-1"></i> Hi, ${user.username}
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="adminNavbarDropdown" style="border-radius: var(--radius-md); border: 1px solid var(--glass-border); background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);">
+          <li><a class="dropdown-item py-2 text-danger" href="#" id="adminLogoutBtn"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+        </ul>
+      `;
+
+      document.getElementById('adminLogoutBtn').addEventListener('click', (e) => {
+        e.preventDefault();
+        fetch('/api/auth/logout', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` }
+        }).finally(() => {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          window.location.href = 'index.html';
+        });
+      });
+
+      // DOM Elements
+      const productsTableBody = document.getElementById('adminProductsTableBody');
+      const openAddProductModalBtn = document.getElementById('openAddProductModalBtn');
+      const productModal = new bootstrap.Modal(document.getElementById('productModal'));
+      const productModalLabel = document.getElementById('productModalLabel');
+      const productForm = document.getElementById('productForm');
+      const productIdInput = document.getElementById('productId');
+      const prodNameInput = document.getElementById('prodName');
+      const prodPriceInput = document.getElementById('prodPrice');
+      const prodCategorySelect = document.getElementById('prodCategory');
+      const prodImageUrlInput = document.getElementById('prodImageUrl');
+      const prodDescInput = document.getElementById('prodDesc');
+      const generalFeedback = document.getElementById('productFormGeneralFeedback');
+      
+      const deleteConfirmModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+      const deleteProductNameNode = document.getElementById('deleteProductName');
+      const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+
+      let allProducts = [];
+      let deleteTargetId = null;
+
+      // Toast Notifications function
+      function showToast(message, type = 'success') {
+        let toastContainer = document.getElementById('toastContainer');
+        if (!toastContainer) {
+          toastContainer = document.createElement('div');
+          toastContainer.id = 'toastContainer';
+          toastContainer.style.position = 'fixed';
+          toastContainer.style.bottom = '24px';
+          toastContainer.style.right = '24px';
+          toastContainer.style.zIndex = '1100';
+          toastContainer.style.display = 'flex';
+          toastContainer.style.flexDirection = 'column';
+          toastContainer.style.gap = '10px';
+          document.body.appendChild(toastContainer);
+        }
+
+        const toast = document.createElement('div');
+        toast.className = 'glass-card animate-slide-in';
+        toast.style.padding = '16px 24px';
+        toast.style.borderRadius = 'var(--radius-md)';
+        toast.style.background = type === 'success' ? 'rgba(46, 125, 50, 0.95)' : 'rgba(211, 47, 47, 0.95)';
+        toast.style.color = '#ffffff';
+        toast.style.border = '1px solid rgba(255, 255, 255, 0.2)';
+        toast.style.boxShadow = 'var(--glass-shadow-large)';
+        toast.style.backdropFilter = 'blur(10px)';
+        toast.style.webkitBackdropFilter = 'blur(10px)';
+        toast.style.transition = 'all 0.4s ease';
+
+        toast.innerHTML = `
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'}"></i>
+            <span style="font-weight: 600;">${message}</span>
+          </div>
+        `;
+        toastContainer.appendChild(toast);
+
+        setTimeout(() => {
+          toast.style.opacity = '1';
+        }, 50);
+
+        setTimeout(() => {
+          toast.style.opacity = '0';
+          setTimeout(() => toast.remove(), 400);
+        }, 4000);
+      }
+
+      // Load products from API
+      function loadDashboardProducts() {
+        productsTableBody.innerHTML = `
+          <tr>
+            <td colspan="6" class="text-center py-4">
+              <div class="spinner-border text-success" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <p class="text-muted mt-2 mb-0 font-headings">Loading items...</p>
+            </td>
+          </tr>
+        `;
+
+        fetch('/api/products')
+          .then(res => res.json())
+          .then(products => {
+            allProducts = products;
+            renderTable(products);
+            updateStats(products);
+          })
+          .catch(err => {
+            productsTableBody.innerHTML = `
+              <tr>
+                <td colspan="6" class="text-center py-4 text-danger">
+                  <i class="bi bi-exclamation-triangle-fill fs-3 d-block mb-2"></i>
+                  Failed to fetch products: ${err.message}
+                </td>
+              </tr>
+            `;
+          });
+      }
+
+      function updateStats(products) {
+        document.getElementById('statTotalItems').textContent = products.length;
+      }
+
+      function renderTable(products) {
+        if (products.length === 0) {
+          productsTableBody.innerHTML = `
+            <tr>
+              <td colspan="6" class="text-center py-4 text-muted">No items available. Click "Add New Product" to seed your catalog.</td>
+            </tr>
+          `;
+          return;
+        }
+
+        productsTableBody.innerHTML = '';
+        products.forEach(p => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>
+              <img src="${p.imageUrl || 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=200&q=80'}" alt="${p.name}" class="rounded" style="width: 60px; height: 60px; object-fit: cover;">
+            </td>
+            <td>
+              <h5 class="mb-0 fs-6 fw-bold text-dark">${p.name}</h5>
+              <span class="text-muted small">ID: ${p.id}</span>
+            </td>
+            <td>
+              <span class="glass-card-tag m-0 text-uppercase" style="font-size: 0.7rem;">${p.category}</span>
+            </td>
+            <td class="fw-bold text-primary">$${p.price.toFixed(2)}</td>
+            <td>
+              <p class="mb-0 small text-muted text-truncate-2" style="max-width: 300px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${p.description || ''}</p>
+            </td>
+            <td class="text-center">
+              <div class="btn-group gap-2">
+                <button class="btn btn-sm btn-outline-success edit-btn" data-id="${p.id}" style="border-radius: var(--radius-sm);"><i class="bi bi-pencil-square"></i></button>
+                <button class="btn btn-sm btn-outline-danger delete-btn" data-id="${p.id}" style="border-radius: var(--radius-sm);"><i class="bi bi-trash"></i></button>
+              </div>
+            </td>
+          `;
+          productsTableBody.appendChild(tr);
+        });
+
+        // Attach action buttons event listeners
+        document.querySelectorAll('.edit-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const id = e.currentTarget.getAttribute('data-id');
+            openEditModal(id);
+          });
+        });
+
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const id = e.currentTarget.getAttribute('data-id');
+            openDeleteModal(id);
+          });
+        });
+      }
+
+      // Add Product Modal Open
+      openAddProductModalBtn.addEventListener('click', () => {
+        productForm.reset();
+        productIdInput.value = '';
+        productModalLabel.textContent = 'Add New Product';
+        generalFeedback.style.display = 'none';
+        
+        // Remove validation state
+        [prodNameInput, prodPriceInput, prodCategorySelect, prodImageUrlInput, prodDescInput].forEach(el => {
+          el.classList.remove('is-valid', 'is-invalid');
+        });
+
+        productModal.show();
+      });
+
+      // Edit Product Modal Open
+      function openEditModal(id) {
+        const product = allProducts.find(p => p.id == id);
+        if (!product) return;
+
+        productIdInput.value = product.id;
+        prodNameInput.value = product.name;
+        prodPriceInput.value = product.price;
+        prodCategorySelect.value = product.category;
+        prodImageUrlInput.value = product.imageUrl;
+        prodDescInput.value = product.description;
+
+        productModalLabel.textContent = 'Edit Product Details';
+        generalFeedback.style.display = 'none';
+
+        [prodNameInput, prodPriceInput, prodCategorySelect, prodImageUrlInput, prodDescInput].forEach(el => {
+          el.classList.remove('is-valid', 'is-invalid');
+        });
+
+        productModal.show();
+      }
+
+      // Delete Product Modal Open
+      function openDeleteModal(id) {
+        const product = allProducts.find(p => p.id == id);
+        if (!product) return;
+
+        deleteTargetId = product.id;
+        deleteProductNameNode.textContent = product.name;
+        deleteConfirmModal.show();
+      }
+
+      // Delete Confirm Handler
+      confirmDeleteBtn.addEventListener('click', () => {
+        if (!deleteTargetId) return;
+
+        fetch(`/api/products/${deleteTargetId}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        })
+        .then(res => {
+          if (!res.ok) throw new Error('Failed to delete product.');
+          showToast('Product deleted successfully!');
+          deleteConfirmModal.hide();
+          loadDashboardProducts();
+        })
+        .catch(err => {
+          showToast(err.message, 'error');
+        });
+      });
+
+      // Form Submit handler
+      productForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        generalFeedback.style.display = 'none';
+
+        const isNameValid = validateField(prodNameInput, prodNameInput.value.trim().length > 0, 'Name is required.');
+        const isPriceValid = validateField(prodPriceInput, parseFloat(prodPriceInput.value) >= 0, 'Valid price is required.');
+        const isCatValid = validateField(prodCategorySelect, prodCategorySelect.value !== '', 'Category is required.');
+        const isImageValid = validateField(prodImageUrlInput, prodImageUrlInput.value.trim().length > 0, 'Image URL is required.');
+        const isDescValid = validateField(prodDescInput, prodDescInput.value.trim().length > 0, 'Description is required.');
+
+        if (!isNameValid || !isPriceValid || !isCatValid || !isImageValid || !isDescValid) return;
+
+        const pId = productIdInput.value;
+        const url = pId ? `/api/products/${pId}` : '/api/products';
+        const method = pId ? 'PUT' : 'POST';
+
+        const payload = {
+          name: prodNameInput.value.trim(),
+          price: parseFloat(prodPriceInput.value),
+          category: prodCategorySelect.value,
+          imageUrl: prodImageUrlInput.value.trim(),
+          description: prodDescInput.value.trim(),
+          rating: 5.0,
+          reviewCount: 0
+        };
+
+        fetch(url, {
+          method: method,
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(payload)
+        })
+        .then(async res => {
+          if (!res.ok) {
+            const errData = await res.json();
+            throw new Error(errData.message || 'Saving product failed.');
+          }
+          return res.json();
+        })
+        .then(() => {
+          showToast(pId ? 'Product updated successfully!' : 'Product added successfully!');
+          productModal.hide();
+          loadDashboardProducts();
+        })
+        .catch(err => {
+          generalFeedback.textContent = err.message;
+          generalFeedback.style.display = 'block';
+        });
+      });
+
+      // Field Validator
+      function validateField(inputElement, condition, errorMessage) {
+        const feedbackEl = inputElement.nextElementSibling;
+        if (condition) {
+          inputElement.classList.remove('is-invalid');
+          inputElement.classList.add('is-valid');
+          if (feedbackEl && feedbackEl.classList.contains('validation-message')) {
+            feedbackEl.style.display = 'none';
+          }
+          return true;
+        } else {
+          inputElement.classList.remove('is-valid');
+          inputElement.classList.add('is-invalid');
+          if (feedbackEl && feedbackEl.classList.contains('validation-message')) {
+            feedbackEl.textContent = errorMessage;
+            feedbackEl.style.display = 'block';
+          }
+          return false;
+        }
+      }
+
+      // Initial Load
+      loadDashboardProducts();
+    });
+  </script>
+</body>
+</html>
