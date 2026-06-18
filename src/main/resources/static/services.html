@@ -105,7 +105,7 @@
 
     <section class="py-5" id="catalogSection">
       <div class="container py-3">
-        <div class="row mb-5 justify-content-center reveal-on-scroll">
+        <div class="row mb-4 justify-content-center reveal-on-scroll">
           <div class="col-lg-8">
             <div
               class="d-flex flex-wrap justify-content-center gap-2"
@@ -127,372 +127,67 @@
           </div>
         </div>
 
+        <!-- Search, Filter & Sort Panel -->
+        <div class="row mb-5 justify-content-center reveal-on-scroll">
+          <div class="col-lg-10">
+            <div class="glass-card p-4">
+              <div class="row g-3 align-items-center">
+                <!-- Search Box -->
+                <div class="col-lg-4 col-md-6">
+                  <div class="input-group">
+                    <span class="input-group-text bg-transparent border-end-0" style="border-color: var(--glass-border); border-top-left-radius: 50px; border-bottom-left-radius: 50px; color: var(--primary); padding-left: 20px;">
+                      <i class="bi bi-search"></i>
+                    </span>
+                    <input type="text" id="catalogSearchInput" class="form-control bg-transparent border-start-0 border-end-0" placeholder="Search products..." style="border-color: var(--glass-border); box-shadow: none;">
+                    <button class="btn btn-premium btn-premium-primary" type="button" id="catalogSearchBtn" style="border-top-right-radius: 50px; border-bottom-right-radius: 50px; padding: 0 24px; font-size: 0.95rem;">
+                      Search
+                    </button>
+                  </div>
+                </div>
+                <!-- Price Filter -->
+                <div class="col-lg-3 col-md-6">
+                  <select id="priceFilterSelect" class="form-select glass-select">
+                    <option value="all">All Prices</option>
+                    <option value="0-15">Under $15</option>
+                    <option value="15-25">$15 - $25</option>
+                    <option value="25-999">Over $25</option>
+                  </select>
+                </div>
+                <!-- Rating Filter -->
+                <div class="col-lg-2 col-md-6">
+                  <select id="ratingFilterSelect" class="form-select glass-select">
+                    <option value="all">All Ratings</option>
+                    <option value="5">5 Stars</option>
+                    <option value="4">4 Stars & Up</option>
+                    <option value="3">3 Stars & Up</option>
+                  </select>
+                </div>
+                <!-- Sorting -->
+                <div class="col-lg-3 col-md-6">
+                  <select id="sortSelect" class="form-select glass-select">
+                    <option value="createdAt,desc">Newest Products</option>
+                    <option value="price,asc">Price: Low to High</option>
+                    <option value="price,desc">Price: High to Low</option>
+                    <option value="rating,desc">Highest Rated</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="row g-4" id="productsDisplayGrid">
-          <div
-            class="col-lg-3 col-md-6 product-item reveal-on-scroll"
-            data-category="lifestyle"
-          >
-            <div class="glass-card hover-lift">
-              <a
-                href="product-detail.html"
-                class="d-block glass-card-img-wrapper"
-              >
-                <img
-                  src="https://images.unsplash.com/photo-1602143407151-7111542de6e8?auto=format&fit=crop&w=800&q=80"
-                  alt="Insulated Eco-Flask"
-                  class="glass-card-img"
-                />
-              </a>
-              <div class="glass-card-body">
-                <span class="glass-card-tag">LIFESTYLE</span>
-                <h3 class="glass-card-title">
-                  <a
-                    href="product-detail.html"
-                    class="text-dark text-decoration-none"
-                    >Insulated Eco-Flask</a
-                  >
-                </h3>
-                <div class="text-warning small mb-2">
-                  <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i
-                  ><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i
-                  ><i class="bi bi-star-fill"></i> (48)
-                </div>
-                <div
-                  class="d-flex justify-content-between align-items-center mt-3"
-                >
-                  <span class="glass-card-price">$28.00</span>
-                  <a
-                    href="product-detail.html"
-                    class="btn btn-premium btn-premium-primary py-2 px-3 fs-6"
-                    style="border-radius: 50%"
-                    aria-label="View product"
-                    ><i class="bi bi-bag"></i
-                  ></a>
-                </div>
-              </div>
-            </div>
-          </div>
+          <!-- Injected Dynamically by script.js -->
+        </div>
 
-          <div
-            class="col-lg-3 col-md-6 product-item reveal-on-scroll"
-            data-category="home"
-            style="transition-delay: 0.05s"
-          >
-            <div class="glass-card hover-lift">
-              <a
-                href="product-detail.html"
-                class="d-block glass-card-img-wrapper"
-              >
-                <img
-                  src="https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=800&q=80"
-                  alt="Organic Woven Tote Bag"
-                  class="glass-card-img"
-                />
-              </a>
-              <div class="glass-card-body">
-                <span class="glass-card-tag">HOME</span>
-                <h3 class="glass-card-title">
-                  <a
-                    href="product-detail.html"
-                    class="text-dark text-decoration-none"
-                    >Organic Woven Tote</a
-                  >
-                </h3>
-                <div class="text-warning small mb-2">
-                  <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i
-                  ><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i
-                  ><i class="bi bi-star-half"></i> (32)
-                </div>
-                <div
-                  class="d-flex justify-content-between align-items-center mt-3"
-                >
-                  <span class="glass-card-price">$16.00</span>
-                  <a
-                    href="product-detail.html"
-                    class="btn btn-premium btn-premium-primary py-2 px-3 fs-6"
-                    style="border-radius: 50%"
-                    aria-label="View product"
-                    ><i class="bi bi-bag"></i
-                  ></a>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div
-            class="col-lg-3 col-md-6 product-item reveal-on-scroll"
-            data-category="personal"
-            style="transition-delay: 0.1s"
-          >
-            <div class="glass-card hover-lift">
-              <a
-                href="product-detail.html"
-                class="d-block glass-card-img-wrapper"
-              >
-                <img
-                  src="https://images.unsplash.com/photo-1546552768-9e3a94b38a59?auto=format&fit=crop&w=800&q=80"
-                  alt="Artisanal Botanical Soap"
-                  class="glass-card-img"
-                />
-              </a>
-              <div class="glass-card-body">
-                <span class="glass-card-tag">PERSONAL CARE</span>
-                <h3 class="glass-card-title">
-                  <a
-                    href="product-detail.html"
-                    class="text-dark text-decoration-none"
-                    >Botanical Soap Trio</a
-                  >
-                </h3>
-                <div class="text-warning small mb-2">
-                  <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i
-                  ><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i
-                  ><i class="bi bi-star-fill"></i> (64)
-                </div>
-                <div
-                  class="d-flex justify-content-between align-items-center mt-3"
-                >
-                  <span class="glass-card-price">$9.50</span>
-                  <a
-                    href="product-detail.html"
-                    class="btn btn-premium btn-premium-primary py-2 px-3 fs-6"
-                    style="border-radius: 50%"
-                    aria-label="View product"
-                    ><i class="bi bi-bag"></i
-                  ></a>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div
-            class="col-lg-3 col-md-6 product-item reveal-on-scroll"
-            data-category="personal"
-            style="transition-delay: 0.15s"
-          >
-            <div class="glass-card hover-lift">
-              <a
-                href="product-detail.html"
-                class="d-block glass-card-img-wrapper"
-              >
-                <img
-                  src="https://images.unsplash.com/photo-1589365252845-092198ba5334?auto=format&fit=crop&w=800&q=80"
-                  alt="Bamboo Dental Starter"
-                  class="glass-card-img"
-                />
-              </a>
-              <div class="glass-card-body">
-                <span class="glass-card-tag">PERSONAL CARE</span>
-                <h3 class="glass-card-title">
-                  <a
-                    href="product-detail.html"
-                    class="text-dark text-decoration-none"
-                    >Bamboo Toothbrushes</a
-                  >
-                </h3>
-                <div class="text-warning small mb-2">
-                  <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i
-                  ><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i
-                  ><i class="bi bi-star-fill"></i> (120)
-                </div>
-                <div
-                  class="d-flex justify-content-between align-items-center mt-3"
-                >
-                  <span class="glass-card-price">$12.00</span>
-                  <a
-                    href="product-detail.html"
-                    class="btn btn-premium btn-premium-primary py-2 px-3 fs-6"
-                    style="border-radius: 50%"
-                    aria-label="View product"
-                    ><i class="bi bi-bag"></i
-                  ></a>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div
-            class="col-lg-3 col-md-6 product-item reveal-on-scroll"
-            data-category="home"
-            style="transition-delay: 0.2s"
-          >
-            <div class="glass-card hover-lift">
-              <a
-                href="product-detail.html"
-                class="d-block glass-card-img-wrapper"
-              >
-                <img
-                  src="https://images.unsplash.com/photo-1531346878377-a5be20888e57?auto=format&fit=crop&w=800&q=80"
-                  alt="Cork Notebook"
-                  class="glass-card-img"
-                />
-              </a>
-              <div class="glass-card-body">
-                <span class="glass-card-tag">HOME</span>
-                <h3 class="glass-card-title">
-                  <a
-                    href="product-detail.html"
-                    class="text-dark text-decoration-none"
-                    >Cork Bound Notebook</a
-                  >
-                </h3>
-                <div class="text-warning small mb-2">
-                  <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i
-                  ><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i
-                  ><i class="bi bi-star-half"></i> (21)
-                </div>
-                <div
-                  class="d-flex justify-content-between align-items-center mt-3"
-                >
-                  <span class="glass-card-price">$18.50</span>
-                  <a
-                    href="product-detail.html"
-                    class="btn btn-premium btn-premium-primary py-2 px-3 fs-6"
-                    style="border-radius: 50%"
-                    aria-label="View product"
-                    ><i class="bi bi-bag"></i
-                  ></a>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div
-            class="col-lg-3 col-md-6 product-item reveal-on-scroll"
-            data-category="home"
-            style="transition-delay: 0.25s"
-          >
-            <div class="glass-card hover-lift">
-              <a
-                href="product-detail.html"
-                class="d-block glass-card-img-wrapper"
-              >
-                <img
-                  src="https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&w=800&q=80"
-                  alt="Eco Packaging food wrap"
-                  class="glass-card-img"
-                />
-              </a>
-              <div class="glass-card-body">
-                <span class="glass-card-tag">HOME</span>
-                <h3 class="glass-card-title">
-                  <a
-                    href="product-detail.html"
-                    class="text-dark text-decoration-none"
-                    >Beeswax Food Wraps</a
-                  >
-                </h3>
-                <div class="text-warning small mb-2">
-                  <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i
-                  ><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i
-                  ><i class="bi bi-star"></i> (54)
-                </div>
-                <div
-                  class="d-flex justify-content-between align-items-center mt-3"
-                >
-                  <span class="glass-card-price">$14.00</span>
-                  <a
-                    href="product-detail.html"
-                    class="btn btn-premium btn-premium-primary py-2 px-3 fs-6"
-                    style="border-radius: 50%"
-                    aria-label="View product"
-                    ><i class="bi bi-bag"></i
-                  ></a>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div
-            class="col-lg-3 col-md-6 product-item reveal-on-scroll"
-            data-category="personal"
-            style="transition-delay: 0.3s"
-          >
-            <div class="glass-card hover-lift">
-              <a
-                href="product-detail.html"
-                class="d-block glass-card-img-wrapper"
-              >
-                <img
-                  src="https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?auto=format&fit=crop&w=800&q=80"
-                  alt="Zero waste solid cosmetics"
-                  class="glass-card-img"
-                />
-              </a>
-              <div class="glass-card-body">
-                <span class="glass-card-tag">PERSONAL CARE</span>
-                <h3 class="glass-card-title">
-                  <a
-                    href="product-detail.html"
-                    class="text-dark text-decoration-none"
-                    >Charcoal Deodorant</a
-                  >
-                </h3>
-                <div class="text-warning small mb-2">
-                  <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i
-                  ><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i
-                  ><i class="bi bi-star-fill"></i> (89)
-                </div>
-                <div
-                  class="d-flex justify-content-between align-items-center mt-3"
-                >
-                  <span class="glass-card-price">$11.00</span>
-                  <a
-                    href="product-detail.html"
-                    class="btn btn-premium btn-premium-primary py-2 px-3 fs-6"
-                    style="border-radius: 50%"
-                    aria-label="View product"
-                    ><i class="bi bi-bag"></i
-                  ></a>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div
-            class="col-lg-3 col-md-6 product-item reveal-on-scroll"
-            data-category="lifestyle"
-            style="transition-delay: 0.35s"
-          >
-            <div class="glass-card hover-lift">
-              <a
-                href="product-detail.html"
-                class="d-block glass-card-img-wrapper"
-              >
-                <img
-                  src="https://images.unsplash.com/photo-1530587191325-3db32d826c18?auto=format&fit=crop&w=800&q=80"
-                  alt="Artisanal coconut bowls"
-                  class="glass-card-img"
-                />
-              </a>
-              <div class="glass-card-body">
-                <span class="glass-card-tag">LIFESTYLE</span>
-                <h3 class="glass-card-title">
-                  <a
-                    href="product-detail.html"
-                    class="text-dark text-decoration-none"
-                    >Coconut Shell Bowls</a
-                  >
-                </h3>
-                <div class="text-warning small mb-2">
-                  <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i
-                  ><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i
-                  ><i class="bi bi-star-half"></i> (76)
-                </div>
-                <div
-                  class="d-flex justify-content-between align-items-center mt-3"
-                >
-                  <span class="glass-card-price">$15.00</span>
-                  <a
-                    href="product-detail.html"
-                    class="btn btn-premium btn-premium-primary py-2 px-3 fs-6"
-                    style="border-radius: 50%"
-                    aria-label="View product"
-                    ><i class="bi bi-bag"></i
-                  ></a>
-                </div>
-              </div>
-            </div>
+        <!-- Pagination Controls -->
+        <div class="row mt-5">
+          <div class="col-12 d-flex justify-content-center">
+            <nav aria-label="Catalog Page Navigation">
+              <ul class="pagination pagination-premium justify-content-center" id="catalogPagination">
+                <!-- Page items injected dynamically -->
+              </ul>
+            </nav>
           </div>
         </div>
       </div>

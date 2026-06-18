@@ -109,6 +109,7 @@
           <div class="col-lg-6">
             <div class="glass-card p-2 rounded-4 text-center">
               <img
+                id="detailProductImage"
                 src="https://images.unsplash.com/photo-1602143407151-7111542de6e8?auto=format&fit=crop&w=800&q=80"
                 alt="Insulated Eco-Flask"
                 class="img-fluid rounded-3 w-100"
@@ -119,27 +120,32 @@
 
           <div class="col-lg-6">
             <div class="product-info-wrapper">
-              <span class="glass-card-tag mb-3">LIFESTYLE</span>
-              <h1 class="display-5 fw-bold text-dark font-headings mb-2">
+              <span id="detailProductCategory" class="glass-card-tag mb-3">LIFESTYLE</span>
+              <h1 id="detailProductName" class="display-5 fw-bold text-dark font-headings mb-2">
                 Insulated Eco-Flask
               </h1>
 
               <div class="d-flex align-items-center gap-2 mb-3">
-                <div class="text-warning small">
+                <div id="detailProductStars" class="text-warning small">
                   <i class="bi bi-star-fill"></i>
                   <i class="bi bi-star-fill"></i>
                   <i class="bi bi-star-fill"></i>
                   <i class="bi bi-star-fill"></i>
                   <i class="bi bi-star-fill"></i>
                 </div>
-                <span class="small text-muted">(48 customer reviews)</span>
+                <span id="detailProductReviewsLabel" class="small text-muted">(48 customer reviews)</span>
               </div>
 
-              <div class="fs-2 fw-bold text-success mb-4 font-headings">
+              <!-- Stock Status -->
+              <div class="mb-3">
+                <span id="detailStockStatus" class="badge py-2 px-3 fs-6">Loading status...</span>
+              </div>
+
+              <div id="detailProductPrice" class="fs-2 fw-bold text-success mb-4 font-headings">
                 $28.00
               </div>
 
-              <p class="text-muted fs-6 mb-4" style="line-height: 1.8">
+              <p id="detailProductDescription" class="text-muted fs-6 mb-4" style="line-height: 1.8">
                 Our Insulated Eco-Flask is meticulously engineered to replace
                 single-use coffee cups and plastic bottles. Featuring high-grade
                 double-wall insulation, it keeps your beverages hot for 12 hours
@@ -158,11 +164,6 @@
                 </li>
                 <li class="mb-2 d-flex align-items-center gap-2">
                   <i class="bi bi-check-circle-fill text-success"></i>
-                  <span class="text-dark fw-medium">Capacity:</span>
-                  <span class="text-muted">500 ml</span>
-                </li>
-                <li class="mb-2 d-flex align-items-center gap-2">
-                  <i class="bi bi-check-circle-fill text-success"></i>
                   <span class="text-dark fw-medium">Packaging:</span>
                   <span class="text-muted">100% Home-Compostable Raw Pulp</span>
                 </li>
@@ -175,7 +176,7 @@
                 >
                   <button
                     class="btn btn-link text-dark p-2 text-decoration-none"
-                    onclick="document.getElementById('detailQty').stepDown()"
+                    onclick="const qtyInput = document.getElementById('detailQty'); if(qtyInput.value > 1) qtyInput.stepDown()"
                   >
                     <i class="bi bi-dash"></i>
                   </button>
@@ -203,11 +204,96 @@
                 <button
                   id="buyNowBtn"
                   class="btn-premium btn-premium-primary d-inline-flex align-items-center justify-content-center"
-                  style="height: 54px; padding: 0 40px; border: none"
+                  style="height: 54px; padding: 0 30px; border: none"
                 >
                   Buy Now <i class="bi bi-credit-card-fill ms-2"></i>
                 </button>
+                
+                <button
+                  id="detailAddToCartBtn"
+                  class="btn-premium btn-premium-secondary d-inline-flex align-items-center justify-content-center"
+                  style="height: 54px; padding: 0 30px;"
+                >
+                  Add to Cart <i class="bi bi-bag-plus ms-2"></i>
+                </button>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Reviews Section -->
+    <section class="py-5 bg-light border-top" id="reviewsSection">
+      <div class="container py-3">
+        <h2 class="font-headings fw-bold mb-4">Customer Reviews</h2>
+        
+        <div class="row g-5">
+          <!-- Left Column: Reviews summary & submit form -->
+          <div class="col-lg-5">
+            <div class="glass-card p-4 mb-4">
+              <h3 class="h4 font-headings fw-bold mb-3">Overall Rating</h3>
+              <div class="d-flex align-items-center gap-3 mb-4">
+                <div class="display-3 fw-extrabold text-primary font-headings" id="reviewsAverageRating">5.0</div>
+                <div>
+                  <div class="text-warning fs-5" id="reviewsAverageStars">
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                    <i class="bi bi-star-fill"></i>
+                  </div>
+                  <span class="text-muted small" id="reviewsTotalCount">Based on 0 reviews</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Write Review Form -->
+            <div class="glass-card p-4" id="writeReviewCard" style="display: none;">
+              <h3 class="h4 font-headings fw-bold mb-3">Write a Review</h3>
+              <form id="reviewForm" novalidate>
+                <div class="form-group-custom">
+                  <label class="form-label-custom">Rating</label>
+                  <div class="d-flex gap-2 text-warning fs-4" id="reviewStarRatingInput" style="cursor: pointer;">
+                    <i class="bi bi-star star-rating-input" data-val="1"></i>
+                    <i class="bi bi-star star-rating-input" data-val="2"></i>
+                    <i class="bi bi-star star-rating-input" data-val="3"></i>
+                    <i class="bi bi-star star-rating-input" data-val="4"></i>
+                    <i class="bi bi-star star-rating-input" data-val="5"></i>
+                  </div>
+                  <input type="hidden" id="reviewRatingValue" name="rating" required>
+                  <div class="validation-message" id="reviewRatingFeedback" style="display:none;">Please select a rating.</div>
+                </div>
+
+                <div class="form-group-custom">
+                  <label for="reviewComment" class="form-label-custom">Comments</label>
+                  <textarea id="reviewComment" class="form-control-custom" rows="4" placeholder="Share your experience with this zero-waste product..." required></textarea>
+                  <div class="validation-message" id="reviewCommentFeedback" style="display:none;">Comment is required.</div>
+                </div>
+
+                <div class="form-group-custom">
+                  <label for="reviewImageUrl" class="form-label-custom">Image URL (Optional)</label>
+                  <input type="url" id="reviewImageUrl" class="form-control-custom" placeholder="https://example.com/my-photo.jpg">
+                </div>
+
+                <div class="validation-message text-center mb-3 fs-6" id="reviewFormGeneralFeedback" style="color:#d32f2f; display:none;"></div>
+                <button type="submit" class="btn-premium btn-premium-primary w-100 justify-content-center">
+                  Submit Review <i class="bi bi-send-fill ms-2"></i>
+                </button>
+              </form>
+            </div>
+            
+            <div class="glass-card p-4 text-center" id="reviewLoginPrompt">
+              <i class="bi bi-lock text-muted fs-2"></i>
+              <p class="text-muted mt-2 mb-0">Please login and purchase this product to leave a review.</p>
+            </div>
+          </div>
+
+          <!-- Right Column: Reviews List -->
+          <div class="col-lg-7">
+            <h3 class="h4 font-headings fw-bold mb-4">Review Feed</h3>
+            <div id="reviewsList" class="d-flex flex-column gap-4" style="max-height: 700px; overflow-y: auto; padding-right: 10px;">
+              <!-- Dynamically populated -->
             </div>
           </div>
         </div>

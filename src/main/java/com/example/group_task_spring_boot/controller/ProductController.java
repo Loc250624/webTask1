@@ -7,11 +7,17 @@ import com.example.group_task_spring_boot.service.AuthService;
 import com.example.group_task_spring_boot.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/products")
@@ -24,8 +30,71 @@ public class ProductController {
     private AuthService authService;
 
     @GetMapping
-    public ResponseEntity<List<Product>> getAllProducts() {
-        List<Product> products = productService.getAllProducts();
+    public ResponseEntity<?> getAllProducts(
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(required = false) Double rating,
+            @RequestParam(required = false) String sort,
+            @RequestParam(required = false) String keyword) {
+
+        // Parse sorting
+        Sort sortOrder = Sort.unsorted();
+        if (sort != null && !sort.trim().isEmpty()) {
+            String[] parts = sort.split(",");
+            String property = parts[0].trim();
+            String direction = parts.length > 1 ? parts[1].trim() : "asc";
+            
+            // Map frontend's snake_case or standard fields
+            if (property.equalsIgnoreCase("created_at") || property.equalsIgnoreCase("createdAt")) {
+                property = "createdAt";
+            } else if (property.equalsIgnoreCase("price")) {
+                property = "price";
+            } else if (property.equalsIgnoreCase("rating")) {
+                property = "rating";
+            }
+            
+            sortOrder = Sort.by(
+                direction.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC,
+                property
+            );
+        }
+
+        // If page is specified, return paginated structure
+        if (page != null) {
+            int pageSize = size != null ? size : 10;
+            Pageable pageable = PageRequest.of(page, pageSize, sortOrder);
+            Page<Product> productPage = productService.getProducts(
+                    category, minPrice, maxPrice, rating, keyword, pageable);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("content", productPage.getContent());
+            response.put("totalPages", productPage.getTotalPages());
+            response.put("totalElements", productPage.getTotalElements());
+            response.put("currentPage", productPage.getNumber());
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            // No pagination requested: return list directly (with filters & sorting applied)
+            List<Product> products;
+            if (category != null || minPrice != null || maxPrice != null || rating != null || keyword != null) {
+                products = productService.getProductsList(category, minPrice, maxPrice, rating, keyword, sortOrder);
+            } else {
+                if (sortOrder.isSorted()) {
+                    products = productService.getAllProductsSorted(sortOrder);
+                } else {
+                    products = productService.getAllProducts();
+                }
+            }
+            return new ResponseEntity<>(products, HttpStatus.OK);
+        }
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<Product>> searchProducts(@RequestParam String keyword) {
+        List<Product> products = productService.searchProducts(keyword);
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
 

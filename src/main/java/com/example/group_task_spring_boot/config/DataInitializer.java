@@ -25,6 +25,9 @@ public class DataInitializer implements CommandLineRunner {
     @Autowired
     private UserRoleRepository userRoleRepository;
 
+    @Autowired
+    private org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
+
     @Override
     public void run(String... args) throws Exception {
         // 1. Seed Roles
@@ -141,6 +144,30 @@ public class DataInitializer implements CommandLineRunner {
 
             productRepository.saveAll(Arrays.asList(flask, tote, soap, toothbrush, notebook, wrap, deodorant, bowls));
             System.out.println("--- Seeded 8 sustainable products to database ---");
+        }
+
+        // 5. Seed 50 products from products.sql if database has only default products
+        if (productRepository.count() <= 8) {
+            try {
+                org.springframework.core.io.Resource resource = new org.springframework.core.io.ClassPathResource("data/products.sql");
+                java.io.InputStream inputStream = resource.getInputStream();
+                java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.InputStreamReader(inputStream, java.nio.charset.StandardCharsets.UTF_8));
+                StringBuilder sqlBuilder = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    if (!line.trim().startsWith("--") && !line.trim().isEmpty()) {
+                        sqlBuilder.append(line).append("\n");
+                    }
+                }
+                String sql = sqlBuilder.toString().trim();
+                if (!sql.isEmpty()) {
+                    jdbcTemplate.execute(sql);
+                    System.out.println("--- Successfully seeded 50 products from products.sql ---");
+                }
+            } catch (Exception e) {
+                System.err.println("Failed to seed products from SQL file: " + e.getMessage());
+                e.printStackTrace();
+            }
         }
     }
 }

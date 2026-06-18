@@ -5,41 +5,34 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "products")
+@Table(name = "reviews")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Product {
-    
+public class Review {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "product_id", nullable = false)
+    private Product product;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
     @Column(nullable = false)
-    private String name;
+    private Integer rating;
 
     @Column(length = 1000)
-    private String description;
+    private String comment;
 
-    @Column(nullable = false)
-    private Double price;
-
-    @Column(nullable = false)
-    private String category;
-
-    @Column(name = "image_url")
+    @Column(name = "image_url", length = 1000)
     private String imageUrl;
-
-    private Double rating;
-
-    @Column(name = "review_count")
-    private Integer reviewCount;
-
-    @Column(name = "stock_quantity", nullable = false)
-    @Builder.Default
-    private Integer stockQuantity = 10;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
