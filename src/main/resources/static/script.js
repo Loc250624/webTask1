@@ -384,6 +384,21 @@ document.addEventListener('DOMContentLoaded', () => {
             }
           }
 
+          // Show numeric stock on static cards (index page)
+          try {
+            const body = card ? card.querySelector('.glass-card-body') : null;
+            if (body) {
+              let stockEl = body.querySelector('.card-stock-info');
+              if (!stockEl) {
+                stockEl = document.createElement('div');
+                stockEl.className = 'card-stock-info small text-muted mt-2';
+                body.appendChild(stockEl);
+              }
+              stockEl.innerHTML = `Stock: <span class="fw-bold text-${stock <= 0 ? 'danger' : 'success'}">${stock}</span>`;
+            }
+          } catch (e) {
+            // ignore
+          }
           const newBtn = btn.cloneNode(true);
           btn.parentNode.replaceChild(newBtn, btn);
 
@@ -861,7 +876,8 @@ document.addEventListener('DOMContentLoaded', () => {
     productsDisplayGrid.innerHTML = '';
     products.forEach((product, idx) => {
       const col = document.createElement('div');
-      col.className = 'col-lg-3 col-md-6 product-item';
+      // add reveal class so cards animate like other sections
+      col.className = 'col-lg-3 col-md-6 product-item reveal-on-scroll';
       col.style.transitionDelay = `${idx * 0.05}s`;
 
       const isOutOfStock = product.stockQuantity !== undefined && product.stockQuantity <= 0;
@@ -891,7 +907,10 @@ document.addEventListener('DOMContentLoaded', () => {
               ${generateStarsHTML(product.rating || 5.0)} (${product.reviewCount || 0})
             </div>
             <div class="d-flex justify-content-between align-items-center mt-auto pt-3">
-              <span class="glass-card-price">$${product.price.toFixed(2)}</span>
+              <div>
+                <span class="glass-card-price">$${product.price.toFixed(2)}</span>
+                <div class="small text-muted mt-1">Stock: <span class="fw-bold text-${isOutOfStock ? 'danger' : 'success'}">${product.stockQuantity !== undefined ? product.stockQuantity : 10}</span></div>
+              </div>
               ${buttonHTML}
             </div>
           </div>
@@ -899,6 +918,14 @@ document.addEventListener('DOMContentLoaded', () => {
       `;
       productsDisplayGrid.appendChild(col);
     });
+
+    // Trigger reveal animation for elements added dynamically
+    setTimeout(() => {
+      document.querySelectorAll('.reveal-on-scroll').forEach((el, i) => {
+        // small stagger to mimic original reveal-on-scroll behavior
+        setTimeout(() => el.classList.add('active'), i * 60);
+      });
+    }, 50);
 
     // Attach listeners to cart buttons
     document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
@@ -1151,7 +1178,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (stockStatus) {
           if (isOutOfStock) {
-            stockStatus.textContent = 'Out of Stock';
+            stockStatus.textContent = `Out of Stock`;
             stockStatus.className = 'badge bg-danger py-2 px-3 fs-6';
             if (addToCartBtn) {
               addToCartBtn.disabled = true;
@@ -1162,7 +1189,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (buyNowBtn) buyNowBtn.disabled = true;
             if (qtyInput) qtyInput.disabled = true;
           } else {
-            stockStatus.textContent = 'In Stock';
+            const qty = product.stockQuantity !== undefined ? product.stockQuantity : 10;
+            stockStatus.textContent = `In Stock — ${qty} available`;
             stockStatus.className = 'badge bg-success py-2 px-3 fs-6';
             if (addToCartBtn) {
               addToCartBtn.disabled = false;
@@ -1576,6 +1604,20 @@ document.addEventListener('DOMContentLoaded', () => {
           .then(data => {
             clearCart();
             showCheckoutSuccessModal(chName.value.trim());
+
+            // Refresh catalog or product detail if present so stock updates are visible immediately
+            try {
+              if (window.location.pathname.endsWith('services.html') && typeof loadCatalogProducts === 'function') {
+                loadCatalogProducts();
+              }
+              if (window.location.pathname.endsWith('product-detail.html') && typeof loadProductDetail === 'function') {
+                const params = new URLSearchParams(window.location.search);
+                const pid = parseInt(params.get('id')) || null;
+                if (pid) loadProductDetail(pid);
+              }
+            } catch (e) {
+              // ignore
+            }
           })
           .catch(err => {
             showToast(err.message, 'error');
